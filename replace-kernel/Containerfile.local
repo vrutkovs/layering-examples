@@ -1,0 +1,13 @@
+# This example uses rpm-ostree's cliwrap to allow dracut to run on the container and generate an initramfs.
+FROM quay.io/okd/centos-stream-coreos-9:4.13-x86_64
+# Enable cliwrap.
+RUN rpm-ostree cliwrap install-to-root /
+# Replace the kernel, kernel-core and kernel-modules packages.
+RUN mkdir /tmp/kernel
+WORKDIR /tmp/kernel
+RUN curl -LO https://kojihub.stream.centos.org/kojifiles/packages/kernel/5.14.0/357.el9/x86_64/kernel-5.14.0-357.el9.x86_64.rpm && \
+    curl -LO https://kojihub.stream.centos.org/kojifiles/packages/kernel/5.14.0/357.el9/x86_64/kernel-core-5.14.0-357.el9.x86_64.rpm && \
+    curl -LO https://kojihub.stream.centos.org/kojifiles/packages/kernel/5.14.0/357.el9/x86_64/kernel-modules-5.14.0-357.el9.x86_64.rpm && \
+    curl -LO https://kojihub.stream.centos.org/kojifiles/packages/kernel/5.14.0/357.el9/x86_64/kernel-modules-core-5.14.0-357.el9.x86_64.rpm && \
+    curl -LO https://kojihub.stream.centos.org/kojifiles/packages/kernel/5.14.0/357.el9/x86_64/kernel-modules-extra-5.14.0-357.el9.x86_64.rpm
+RUN rpm-ostree override replace kernel-*.rpm && ostree container commit
